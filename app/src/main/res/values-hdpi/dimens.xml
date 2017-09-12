@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="topMargin">70dp</dimen>
+    <dimen name="gapBetween">56dp</dimen>
+    <dimen name="fabMargin">50dp</dimen>
+    <dimen name="fabBetween">160dp</dimen>
+</resources>

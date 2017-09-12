@@ -1,0 +1,42 @@
+{
+  "project_info": {
+    "project_number": "687965802080",
+    "firebase_url": "https://swlogin-b5fb5.firebaseio.com",
+    "project_id": "swlogin-b5fb5",
+    "storage_bucket": "swlogin-b5fb5.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:687965802080:android:28c12d3831332004",
+        "android_client_info": {
+          "package_name": "com.yagneshlp.swlogin"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "687965802080-okih0imbdmetki8b1kmfh8t16g7n1i2u.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCk74UTsfP9zScHIWvdAs7qJaT_kC_4H2M"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
