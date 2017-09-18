@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_marginTop="40sp"
+    android:layout_height="wrap_content">
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <me.grantland.widget.AutofitTextView
+        android:layout_gravity="center"
+        android:textAlignment="center"
+        android:layout_marginTop="20dp"
+        android:paddingLeft="20dp"
+        android:paddingRight="20dp"
+        android:text="Troubleshooting guide"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:maxLines="1"
+        android:elevation="5dp"
+        android:textColor="@color/colorAccent"
+        android:id="@+id/textv"
+        android:textSize="40sp"></me.grantland.widget.AutofitTextView>
+
+    <me.grantland.widget.AutofitTextView
+        android:layout_marginTop="20dp"
+        android:paddingLeft="20dp"
+        android:paddingRight="20dp"
+        android:text="1.Check your Credentials"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:maxLines="10"
+        android:elevation="5dp"
+        android:textColor="#000"
+        android:textSize="15sp"></me.grantland.widget.AutofitTextView>
+    <me.grantland.widget.AutofitTextView
+        android:layout_marginTop="10dp"
+        android:paddingLeft="20dp"
+        android:paddingRight="20dp"
+        android:text="Many times you'd have made a small mistake. Recheck \nIf still problem persists, check if your password has to be changed at Octa"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:maxLines="10"
+        android:elevation="5dp"
+        android:textColor="#000"
+        android:textSize="10sp"></me.grantland.widget.AutofitTextView>
+
+    <me.grantland.widget.AutofitTextView
+        android:layout_marginTop="20dp"
+        android:paddingLeft="20dp"
+        android:paddingRight="20dp"
+        android:text="2.Toggle Wifi Connection"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:maxLines="10"
+        android:elevation="5dp"
+        android:textColor="#000"
+        android:textSize="15sp"></me.grantland.widget.AutofitTextView>
+    <me.grantland.widget.AutofitTextView
+        android:layout_marginTop="10dp"
+        android:paddingLeft="20dp"
+        android:paddingRight="20dp"
+        android:text="A common fix to all network problems - Turning off and on WiFi has proven to fix the issue\nAlso check if the WiFI connection is stuck at 'Obtaining IP Address' or 'Saved'"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:maxLines="10"
+        android:elevation="5dp"
+        android:textColor="#000"
+        android:textSize="10sp"></me.grantland.widget.AutofitTextView>
+    <me.grantland.widget.AutofitTextView
+        android:layout_marginTop="20dp"
+        android:paddingLeft="20dp"
+        android:paddingRight="20dp"
+        android:text="3.Get Closer to WiFi AP"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:maxLines="10"
+        android:elevation="5dp"
+        android:textColor="#000"
+        android:textSize="15sp"></me.grantland.widget.AutofitTextView>
+    <me.grantland.widget.AutofitTextView
+        android:layout_marginTop="10dp"
+        android:paddingLeft="20dp"
+        android:paddingRight="20dp"
+        android:text="Many Users have reported that getting closer to the AP fixes the issue.\nThis issue occurs even when you are trying to log in using the conventional technique(Even with a considerable high signal strength, the login page would not load). "
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:maxLines="10"
+        android:elevation="5dp"
+        android:textColor="#000"
+        android:textSize="10sp"></me.grantland.widget.AutofitTextView>
+    <me.grantland.widget.AutofitTextView
+        android:layout_marginTop="20dp"
+        android:paddingLeft="20dp"
+        android:paddingRight="20dp"
+        android:text="4. Try Manually Logging in :( "
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:maxLines="10"
+        android:elevation="5dp"
+        android:textColor="#000"
+        android:textSize="15sp"></me.grantland.widget.AutofitTextView>
+
+
+</LinearLayout></ScrollView>

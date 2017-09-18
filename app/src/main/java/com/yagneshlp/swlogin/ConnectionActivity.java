@@ -6,22 +6,32 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.Toast;
-
 import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
-
 import org.json.JSONException;
 import org.json.JSONObject;
-
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
 import java.util.HashMap;
 import java.util.Map;
-
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
 import es.dmoral.toasty.Toasty;
 
 
@@ -35,6 +45,7 @@ public class ConnectionActivity extends Activity {
     SessionManager session;
     private static final String TAG = ConnectionActivity.class.getSimpleName(); //for Logger Purposes
     ProgressDialog progress ;
+    HttpURLConnection conn;
 
     @Override
     public void onPause() {
@@ -45,21 +56,25 @@ public class ConnectionActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         progress = new ProgressDialog(this);
         progress.setMessage("Connecting ... ");
         progress.setProgressStyle(ProgressDialog.STYLE_SPINNER);
         progress.setIndeterminate(true);
         progress.setCancelable(false);
         progress.show();
+
         ConnectivityManager cm = (ConnectivityManager) this.getSystemService(Context.CONNECTIVITY_SERVICE);
+
         session = new SessionManager(getApplicationContext());
+
         NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
         if (activeNetwork != null) { // connected to the internet
             if (activeNetwork.getType() == ConnectivityManager.TYPE_WIFI) {
 
                 Log.d(TAG, "Checking if internet connection exists");
 
-                    String tag_string_req = "req_page1_Sub";
+                    String tag_string_req = "Ping Request";
                     StringRequest strReq = new StringRequest(Request.Method.POST, "http://swlogin.yagneshlp.com/pinp.php"
                             , new Response.Listener<String>() {
                         @Override
@@ -71,7 +86,6 @@ public class ConnectionActivity extends Activity {
                                 boolean error = jObj.getBoolean("error");  //detecting if an error was sent in json
                                 // Check for error node in json
                                 if (!error) {
-                                   // Toast.makeText(getApplicationContext(), "Internet Access Exists !", Toast.LENGTH_LONG).show();
                                     resp = true;
                                     session.setFirstTime(false);
                                     Intent intent = new Intent(ConnectionActivity.this, MainActivity.class);
@@ -100,7 +114,7 @@ public class ConnectionActivity extends Activity {
                             Intent intent = new Intent(ConnectionActivity.this, LoginActivity.class);
                             startActivity(intent);
                             finish();
-                            Log.e(TAG, "Volley Error: " + error.getMessage()); //error in android part logged
+                            Log.e(TAG, "Volley Error: " + error.getMessage() + "(Expected and Handled)"); //error in android part logged
 
                         }
                     }) {
@@ -124,7 +138,6 @@ public class ConnectionActivity extends Activity {
 
             } else if (activeNetwork.getType() == ConnectivityManager.TYPE_MOBILE) {
                 {
-                    //Toast.makeText(getBaseContext(), "You are on Mobile Data! \nSwitch Off Data and Restart App", Toast.LENGTH_LONG).show();
                     Intent intent = new Intent(ConnectionActivity.this, ErrorActivityMob.class);
                     startActivity(intent);
                     finish();
@@ -141,6 +154,6 @@ public class ConnectionActivity extends Activity {
         }
     }
 
-    }
+}
 
 

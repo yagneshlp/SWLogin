@@ -41,7 +41,7 @@ public class SQLiteHandler extends SQLiteOpenHelper {
     @Override
     public void onCreate(SQLiteDatabase db) {
         String CREATE_LOGIN_TABLE = "CREATE TABLE " + TABLE_USER + "("
-                + KEY_ROLL + " INTEGER PRIMARY KEY," + KEY_PASS + " TEXT"
+                + KEY_ROLL + " TEXT PRIMARY KEY," + KEY_PASS + " TEXT"
                 + ")";
         db.execSQL(CREATE_LOGIN_TABLE);
 

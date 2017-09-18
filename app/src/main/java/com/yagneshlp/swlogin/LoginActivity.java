@@ -7,26 +7,17 @@ import android.content.Intent;
 import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Handler;
-import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.widget.Toast;
-
-import com.android.volley.DefaultRetryPolicy;
-import com.android.volley.Request;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.StringRequest;
-
-import org.json.JSONException;
 import org.json.JSONObject;
-
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.net.CookieHandler;
+import java.net.CookieManager;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -35,10 +26,8 @@ import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
-import java.util.HashMap;
 import java.util.Iterator;
-import java.util.Map;
-
+import java.util.UUID;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
@@ -72,15 +61,27 @@ public class LoginActivity extends Activity {
         super.onCreate(savedInstanceState);
         db = new SQLiteHandler(getApplicationContext());
         session = new SessionManager(getApplicationContext());
-        //wifiManager = (WifiManager) getApplicationContext().getSystemService(this.WIFI_SERVICE);
+
+        CookieManager cookieManager = new CookieManager();
+        CookieHandler.setDefault(cookieManager);
+        Log.d(TAG, "New Session Initiated. Generating new cookies");
+        session.setCookieSess(generateString(1));
+        session.setCookePage(generateString(2));
+        Log.d(TAG, "Generated Cookies: "+"cookie1: " + session.getCookieSess() + " Cookie2: " + session.getCookiePage());
+
+        wifiManager = (WifiManager) getApplicationContext().getSystemService(this.WIFI_SERVICE);
+
         progress = new ProgressDialog(this);
+
         roll = db.getRoll();
         pass = db.getPass();
+
         progress.setMessage("Logging in ... ");
         progress.setProgressStyle(ProgressDialog.STYLE_SPINNER);
         progress.setIndeterminate(true);
         progress.setCancelable(false);
         progress.show();
+
        process();
 
     }
@@ -101,6 +102,54 @@ public class LoginActivity extends Activity {
         new SendPost2Request().execute();
     }
 
+
+    private class GetClass1 extends AsyncTask<String, Void, Void> {
+
+        private final Context context;
+
+        public GetClass1(Context c){
+            this.context = c;
+        }
+
+        protected void onPreExecute(){ }
+
+        @Override
+        protected Void doInBackground(String... params) {
+            try {
+
+
+                URL url = new URL("https://192.168.20.1/auth1.html");
+
+                conn = (HttpURLConnection)url.openConnection();
+                conn.setRequestProperty("Cookie","domain=192.168.20.1; SessId="+session.getCookieSess());
+                conn.setRequestProperty("Cookie","domain=192.168.20.1; PageSeed="+session.getCookiePage());
+                conn.setRequestMethod("GET");
+
+                int responseCode = conn.getResponseCode();
+
+                final StringBuilder output = new StringBuilder("Request URL " + url);
+                output.append(System.getProperty("line.separator")  + "Response Code " + responseCode);
+                output.append(System.getProperty("line.separator")  + "Type " + "GET");
+                BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+                String line = "";
+                StringBuilder responseOutput = new StringBuilder();
+                while((line = br.readLine()) != null ) {
+                    responseOutput.append(line);
+                }
+                br.close();
+
+                Log.e(TAG, "GET 1  Result: " + output);
+
+
+            } catch (MalformedURLException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            } catch (IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+            return null;
+        }}
     public class SendPost1Request extends AsyncTask<String, Void, String> {
 
         protected void onPreExecute(){}
@@ -112,23 +161,26 @@ public class LoginActivity extends Activity {
                 URL url = new URL("https://192.168.20.1/auth.cgi"); // here is your URL path
 
                 JSONObject postDataParams = new JSONObject();
+
                 postDataParams.put("uName", roll);
                 postDataParams.put("pass", pass);
+
                 Log.e("params",postDataParams.toString());
 
                 conn = (HttpURLConnection) url.openConnection();
+                conn.setRequestProperty("Cookie","domain=192.168.20.1; SessId="+session.getCookieSess());
+                conn.setRequestProperty("Cookie","domain=192.168.20.1; PageSeed="+session.getCookiePage());
                 conn.setReadTimeout(15000 /* milliseconds */);
                 conn.setConnectTimeout(15000 /* milliseconds */);
                 conn.setRequestMethod("POST");
                 conn.setDoInput(true);
                 conn.setDoOutput(true);
 
-
                 OutputStream os = conn.getOutputStream();
+
                 BufferedWriter writer = new BufferedWriter(
                         new OutputStreamWriter(os, "UTF-8"));
                 writer.write(getPostDataString(postDataParams));
-
                 writer.flush();
                 writer.close();
                 os.close();
@@ -136,26 +188,21 @@ public class LoginActivity extends Activity {
                 int responseCode=conn.getResponseCode();
 
                 if (responseCode == HttpsURLConnection.HTTP_OK) {
-
                     BufferedReader in=new BufferedReader(new
                             InputStreamReader(
                             conn.getInputStream()));
-
                     StringBuffer sb = new StringBuffer("");
                     String line="";
-
                     while((line = in.readLine()) != null) {
 
                         sb.append(line);
-                        break;
                     }
-
                     in.close();
                     return sb.toString();
 
                 }
                 else {
-                    return new String("false : "+responseCode);
+                    return new String("Error : "+responseCode);
                 }
             }
             catch(Exception e){
@@ -166,11 +213,70 @@ public class LoginActivity extends Activity {
 
         @Override
         protected void onPostExecute(String result) {
-            //Toast.makeText(getApplicationContext(), result,
-            // Toast.LENGTH_LONG).show();
-            Log.e("LoginActivity", "execute result " + result);
+
+            boolean found = result.contains("refresh=true");
+            if(found)
+            {
+                Toasty.error(getApplicationContext(), "Please Check your Credentials and try again !",Toast.LENGTH_LONG).show();
+                Intent intent = new Intent(LoginActivity.this, CredActivity.class);
+                startActivity(intent);
+                overridePendingTransition(R.anim.fade_out,R.anim.no_change);
+                finish();
+
+            }
+            else {
+
+            }
+            Log.e(TAG, "Login Result: " + result);
         }
     }
+
+    private class GetClass2 extends AsyncTask<String, Void, Void> {
+
+        private final Context context;
+
+        public GetClass2(Context c){
+            this.context = c;
+        }
+
+        protected void onPreExecute(){  }
+
+        @Override
+        protected Void doInBackground(String... params) {
+            try {
+
+
+                URL url = new URL("https://192.168.20.1/loginStatusTop(eng).html");
+
+                conn = (HttpURLConnection)url.openConnection();
+                conn.setRequestProperty("Cookie","domain=192.168.20.1; SessId="+session.getCookieSess());
+                conn.setRequestProperty("Cookie","domain=192.168.20.1; PageSeed="+session.getCookiePage());
+                conn.setRequestMethod("GET");
+
+                int responseCode = conn.getResponseCode();
+
+                final StringBuilder output = new StringBuilder("Request URL " + url);
+                output.append(System.getProperty("line.separator")  + "Response Code " + responseCode);
+                output.append(System.getProperty("line.separator")  + "Type " + "GET");
+                BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+                String line = "";
+                StringBuilder responseOutput = new StringBuilder();
+                while((line = br.readLine()) != null ) {
+                    responseOutput.append(line);
+                }
+                br.close();
+                Log.e(TAG, "GET 2  Result: " + output);
+
+
+            } catch (MalformedURLException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            } catch (IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+            return null;
+        }}
 
     public class SendPost2Request extends AsyncTask<String, Void, String> {
 
@@ -184,6 +290,8 @@ public class LoginActivity extends Activity {
 
 
                 conn = (HttpURLConnection) url.openConnection();
+                conn.setRequestProperty("Cookie","domain=192.168.20.1; SessId="+session.getCookieSess());
+                conn.setRequestProperty("Cookie","domain=192.168.20.1; PageSeed="+session.getCookiePage());
                 conn.setReadTimeout(15000 /* milliseconds */);
                 conn.setConnectTimeout(15000 /* milliseconds */);
                 conn.setRequestMethod("POST");
@@ -209,7 +317,7 @@ public class LoginActivity extends Activity {
                     while((line = in.readLine()) != null) {
 
                         sb.append(line);
-                        break;
+
                     }
 
                     in.close();
@@ -228,239 +336,31 @@ public class LoginActivity extends Activity {
 
         @Override
         protected void onPostExecute(String result) {
-            boolean found = result.contains("refresh=true");
-            if(found)
-            {
-                Toast.makeText(getApplicationContext(), "Try again Later !",Toast.LENGTH_LONG).show();
-                Intent intent = new Intent(LoginActivity.this, CredActivity.class);
-                startActivity(intent);
-                overridePendingTransition(R.anim.fade_out,R.anim.no_change);
-                finish();
 
-            }
-            else {
-                Log.d(TAG, "Checking if internet connection exists");
+                Log.d(TAG, "Response end = " + result);
+                String time = result.substring(114, 117);
+                time = time.split(";")[0];
+                //Toast.makeText(getApplicationContext(), "Time left = " + time, Toast.LENGTH_LONG).show();
+                int RemainingTime = Integer.parseInt(time);
+                if(RemainingTime != 180 )
+                {
+                    Toasty.error(getApplicationContext(), "Login Not Successful \nCheck your Credentials", Toast.LENGTH_SHORT, true).show();
+                    Intent intent = new Intent(LoginActivity.this, CredActivity.class);
+                    startActivity(intent);
+                    overridePendingTransition(R.anim.fade_out,R.anim.no_change);
+                    finish();
+                }
+                else {
+                    Toasty.success(getApplicationContext(), "Successfully Connected !", Toast.LENGTH_SHORT, true).show();
+                    session.setFirstTime(false);
+                    Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+                    startActivity(intent);
+                    overridePendingTransition(R.anim.fade_out, R.anim.no_change);
+                    finish();
+                }
 
-                String tag_string_req = "req_page1_Sub";
-                StringRequest strReq = new StringRequest(Request.Method.POST, "http://swlogin.yagneshlp.com/pinp.php"
-                        , new Response.Listener<String>() {
-                    @Override
-                    public void onResponse(String response) {
-                        Log.d(TAG, "Ping Response: " + response.toString());
-
-                        try {
-                            JSONObject jObj = new JSONObject(response); //objectifying the json
-                            boolean error = jObj.getBoolean("error");  //detecting if an error was sent in json
-                            // Check for error node in json
-                            if (!error) {
-                                Toasty.success(getApplicationContext(), "Successfully Connected !", Toast.LENGTH_SHORT, true).show();
-                                session.setFirstTime(false);
-                                Intent intent = new Intent(LoginActivity.this, MainActivity.class);
-                                startActivity(intent);
-                                overridePendingTransition(R.anim.fade_out,R.anim.no_change);
-                                finish();
-
-
-                            } else {
-                                if(counter==0) {
-                                    wifiManager.setWifiEnabled(false);
-                                    wifiManager.setWifiEnabled(true);
-                                    counter++;
-                                    new Handler().postDelayed(new Runnable() {
-                                        @Override
-                                        public void run() {
-                                            progress.dismiss();
-                                            process();
-                                        }
-                                    }, 4000);
-
-                                }
-                                else
-                                {   Toasty.error(getApplicationContext(), "Error Occured \nProblem might be with the credentials !", Toast.LENGTH_LONG).show();
-                                    Intent intent = new Intent(LoginActivity.this, CredActivity.class);
-                                    //db.deleteUsers();
-                                    startActivity(intent);
-                                    finish();
-                                }
-
-                            }
-                        } catch (JSONException e) {
-                            // JSON data was not returned, because an error at php script/mysql
-
-                            e.printStackTrace(); //logging error
-
-                        }
-
-                    }
-                }, new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-
-                        Toasty.error(getApplicationContext(), "Error Occured \nProblem might be with the credentials !", Toast.LENGTH_LONG).show();
-                        Intent intent = new Intent(LoginActivity.this, CredActivity.class);
-                        //db.deleteUsers();
-                        startActivity(intent);
-                        finish();
-                        Log.e(TAG, "Volley Error: " + error.getMessage()); //error in android part logged
-
-                    }
-                }) {
-                    @Override
-                    protected Map<String, String> getParams() {
-                        // Posting parameters to login url
-
-                        Map<String, String> params = new HashMap<String, String>();
-                        params.put("Secrt", "1");               //   json POST paran add
-                        return params;
-
-                    }
-                };
-                // Adding request to request queue
-                strReq.setRetryPolicy(new DefaultRetryPolicy(
-                        2000,
-                        DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
-                        DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
-                AppController.getInstance().addToRequestQueue(strReq, tag_string_req);
-
-            }
-
-            Log.e("MainAct", "LoginResponse: " + result.toString());
         }
     }
-
-    private class GetClass1 extends AsyncTask<String, Void, Void> {
-
-        private final Context context;
-
-        public GetClass1(Context c){
-            this.context = c;
-        }
-
-        protected void onPreExecute(){
-
-        }
-
-        @Override
-        protected Void doInBackground(String... params) {
-            try {
-
-
-                URL url = new URL("https://192.168.20.1/auth1.html");
-
-                 conn = (HttpURLConnection)url.openConnection();
-                String urlParameters = "fizz=buzz";
-                conn.setRequestMethod("GET");
-                conn.setRequestProperty("USER-AGENT", "Mozilla/5.0");
-                conn.setRequestProperty("ACCEPT-LANGUAGE", "en-US,en;0.5");
-
-                int responseCode = conn.getResponseCode();
-
-                ///System.out.println("\nSending 'POST' request to URL : " + url);
-                //System.out.println("Post parameters : " + urlParameters);
-                //System.out.println("Response Code : " + responseCode);
-
-                final StringBuilder output = new StringBuilder("Request URL " + url);
-                //output.append(System.getProperty("line.separator") + "Request Parameters " + urlParameters);
-                output.append(System.getProperty("line.separator")  + "Response Code " + responseCode);
-                output.append(System.getProperty("line.separator")  + "Type " + "GET");
-                BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-                String line = "";
-                StringBuilder responseOutput = new StringBuilder();
-                //System.out.println("output===============" + br);
-                while((line = br.readLine()) != null ) {
-                    responseOutput.append(line);
-                }
-                br.close();
-
-                output.append(System.getProperty("line.separator") + "Response " + System.getProperty("line.separator") + System.getProperty("line.separator") + responseOutput.toString());
-
-                LoginActivity.this.runOnUiThread(new Runnable() {
-
-                    @Override
-                    public void run() {
-                        //outputView.setText(output);
-                        //progress.dismiss();
-
-                    }
-                });
-
-
-            } catch (MalformedURLException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            } catch (IOException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
-            return null;
-        }}
-
-    private class GetClass2 extends AsyncTask<String, Void, Void> {
-
-        private final Context context;
-
-        public GetClass2(Context c){
-            this.context = c;
-        }
-
-        protected void onPreExecute(){
-
-        }
-
-        @Override
-        protected Void doInBackground(String... params) {
-            try {
-
-
-                URL url = new URL("https://192.168.20.1/loginStatusTop(eng).html");
-
-                conn = (HttpURLConnection)url.openConnection();
-
-                conn.setRequestMethod("GET");
-                //connection.setRequestProperty("USER-AGENT", "Mozilla/5.0");
-                //connection.setRequestProperty("ACCEPT-LANGUAGE", "en-US,en;0.5");
-
-                int responseCode = conn.getResponseCode();
-
-                ///System.out.println("\nSending 'POST' request to URL : " + url);
-                //System.out.println("Post parameters : " + urlParameters);
-                //System.out.println("Response Code : " + responseCode);
-
-                final StringBuilder output = new StringBuilder("Request URL " + url);
-                //output.append(System.getProperty("line.separator") + "Request Parameters " + urlParameters);
-                output.append(System.getProperty("line.separator")  + "Response Code " + responseCode);
-                output.append(System.getProperty("line.separator")  + "Type " + "GET");
-                BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-                String line = "";
-                StringBuilder responseOutput = new StringBuilder();
-                //System.out.println("output===============" + br);
-                while((line = br.readLine()) != null ) {
-                    responseOutput.append(line);
-                }
-                br.close();
-
-                output.append(System.getProperty("line.separator") + "Response " + System.getProperty("line.separator") + System.getProperty("line.separator") + responseOutput.toString());
-
-                LoginActivity.this.runOnUiThread(new Runnable() {
-
-                    @Override
-                    public void run() {
-                        //outputView.setText(output);
-                        //progress.dismiss();
-
-                    }
-                });
-
-
-            } catch (MalformedURLException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            } catch (IOException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
-            return null;
-        }}
 
     public String getPostDataString(JSONObject params) throws Exception {
 
@@ -515,6 +415,22 @@ public class LoginActivity extends Activity {
         } catch (NoSuchAlgorithmException e) {
             e.printStackTrace();
         }
+    }
+
+    public static String generateString(int useCase) {
+        String uuid = UUID.randomUUID().toString();
+        uuid = uuid.replace("-", "");
+        if(useCase == 1)
+        {
+            uuid = uuid.toUpperCase();
+            return uuid;
+        }
+        else if( useCase ==2)
+        {
+            return uuid;
+        }
+        return "null";
+
     }
 
 

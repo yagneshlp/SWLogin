@@ -8,15 +8,17 @@ android {
         applicationId "com.yagneshlp.swlogin"
         minSdkVersion 16
         targetSdkVersion 21
-        versionCode 7
-        versionName "Production v2"
+        versionCode 9
+        versionName "Alpha v9"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
         release {
-            minifyEnabled true
-            shrinkResources false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+
+            //shrinkResources true
+            //minifyEnabled true
+            proguardFiles getDefaultProguardFile('proguard-android.txt'),
+                    'proguard-rules.pro'
         }
     }
 }
@@ -44,6 +46,7 @@ dependencies {
     //compile 'com.google.firebase:firebase-core:11.2.2'
     compile 'com.google.android.gms:play-services-analytics:10.2.0'
     compile 'com.google.android.gms:play-services-ads:10.2.0'
+    compile 'com.github.GwonHyeok:StickySwitch:0.0.13'
 
     testCompile 'junit:junit:4.12'
 }

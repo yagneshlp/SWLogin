@@ -4,26 +4,26 @@
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:custom="http://schemas.android.com/apk/res-auto"
+    xmlns:fab="http://schemas.android.com/apk/res-auto"
     android:background="#414141"
     tools:context="com.yagneshlp.swlogin.CredActivity">
 
     <android.support.v7.widget.CardView
-        android:layout_height="wrap_content"
         android:layout_width="match_parent"
-        android:layout_margin="20dp"
+        android:layout_height="wrap_content"
         android:layout_gravity="center"
-        app:cardTitle="Test Title"
+        android:layout_margin="20dp"
+        android:elevation="8dp"
         app:cardCornerRadius="10dp"
         app:cardDescription="Test Description"
-        android:elevation="8dp"
-        >
+        app:cardTitle="Test Title">
+
 
         <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
             xmlns:app="http://schemas.android.com/apk/res-auto"
             android:layout_width="match_parent"
-            android:layout_marginTop="40sp"
-            android:layout_height="wrap_content">
-
+            android:layout_height="wrap_content"
+            android:layout_marginTop="40sp">
 
 
             <LinearLayout
@@ -38,17 +38,37 @@
                 android:weightSum="1">
 
                 <me.grantland.widget.AutofitTextView
-                    android:layout_gravity="center"
-                    android:textAlignment="center"
-                    android:layout_marginTop="20sp"
-                    android:paddingBottom="20sp"
-                    android:text="Your WiFi Login Credentials ?"
+                    android:id="@+id/textv"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_marginTop="20sp"
                     android:maxLines="1"
-                    android:id="@+id/textv"
+                    android:paddingBottom="20sp"
+                    android:text="Your WiFi Login Credentials ?"
+                    android:textAlignment="center"
                     android:textSize="25sp"></me.grantland.widget.AutofitTextView>
 
+<RelativeLayout
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+</RelativeLayout>
+
+
+                <android.support.design.widget.TextInputLayout
+                    android:id="@+id/input_layout_user"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:visibility="gone">
+                      <EditText
+                        android:id="@+id/uname"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="Username"
+                        android:inputType="text"
+                        android:singleLine="true" />
+                </android.support.design.widget.TextInputLayout>
                 <android.support.design.widget.TextInputLayout
                     android:id="@+id/input_layout_rollno"
                     android:layout_width="match_parent"
@@ -57,7 +77,9 @@
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:id="@+id/RollNotv"
                         android:text="It consists of 9 Digits" />
+
 
 
                     <EditText
@@ -69,11 +91,22 @@
                         android:singleLine="true" />
                 </android.support.design.widget.TextInputLayout>
 
+
+                <Switch
+                    android:id="@+id/switch1"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_gravity="end"
+                    android:textColor="@color/background"
+                    android:text="I am a Faculty " />
+
+
                 <android.support.design.widget.TextInputLayout
                     android:id="@+id/input_layout_Password"
                     android:layout_width="match_parent"
-                    android:paddingTop="20dp"
-                    android:layout_height="wrap_content">
+                    android:layout_height="wrap_content"
+                    android:paddingTop="5dp">
 
 
                     <CheckBox
@@ -98,19 +131,31 @@
                     android:id="@+id/buttonsave"
                     android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
-                    android:text="Save"
-                    android:background="@color/colorPrimary"
+                    android:layout_marginBottom="20sp"
                     android:layout_marginTop="40dp"
-                    android:textColor="@android:color/white"
-                    android:layout_marginBottom="40sp"
-                    android:paddingBottom="0dp"
-
+                    android:background="@color/colorPrimary"
                     android:elevation="5dp"
-                  />
+                    android:paddingBottom="0dp"
+                    android:text="Save"
+                    android:textColor="@android:color/white" />
+
+                <me.grantland.widget.AutofitTextView
+                    android:id="@+id/te"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:maxLines="1"
+                    android:paddingBottom="20sp"
+                    android:text="Trouble Logging in?"
+                    android:onClick="help"
+                    android:textAlignment="center"
+                    android:textSize="12dp"></me.grantland.widget.AutofitTextView>
+
 
             </LinearLayout>
 
         </ScrollView>
+
 
     </android.support.v7.widget.CardView>
 

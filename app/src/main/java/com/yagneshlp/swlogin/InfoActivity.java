@@ -13,38 +13,24 @@ import android.view.View;
 public class InfoActivity extends Activity {
 
     @Override
-    public void onBackPressed()    {
+    public void onBackPressed()   {
 
         finish();
-        startActivity(new Intent(InfoActivity.this,MainActivity.class));
+        Intent intent = new Intent(InfoActivity.this, MainActivity.class);
+        intent.putExtra("ShouldShow", "No");
+        startActivity(intent);
         overridePendingTransition(R.anim.fade_out,R.anim.no_change);
 
     }
-
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_info);
     }
 
-    public void eula(View view)
-    {
-        String url = "http://slambook.yagneshlp.com/eula/";
-        Intent i = new Intent(Intent.ACTION_VIEW);
-        i.setData(Uri.parse(url));
-        startActivity(i);
-    }
     public void policy(View view)
     {
         String url = "http://swlogin.yagneshlp.com/privacy/";
-        Intent i = new Intent(Intent.ACTION_VIEW);
-        i.setData(Uri.parse(url));
-        startActivity(i);
-    }
-    public void thirdparty(View view)
-    {
-        String url = "http://slambook.yagneshlp.com/thirdparty/";
         Intent i = new Intent(Intent.ACTION_VIEW);
         i.setData(Uri.parse(url));
         startActivity(i);
