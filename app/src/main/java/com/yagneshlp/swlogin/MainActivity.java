@@ -90,6 +90,8 @@ public class MainActivity extends Activity {
         HttpsURLConnection.setDefaultHostnameVerifier(new NullHostNameVerifier());
         new RemainingTimeRequest().execute();
 
+        //startService(new Intent(getBaseContext(), RemainingTimeService.class));
+
     }
 
     public void yaglp(View v)
@@ -105,13 +107,14 @@ public class MainActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        progress = new ProgressDialog(this);
         Intent iin= getIntent();
         Bundle b = iin.getExtras();
-        String j="Yes";
+        String j="No";
         if(b!=null) {
             j = (String) b.get("ShouldShow");
         }
-
+        startService(new Intent(getBaseContext(), PersistService.class));
         db = new SQLiteHandler(getApplicationContext());
         session = new SessionManager(getApplicationContext());
         fab = (FloatingActionButton) findViewById(R.id.fab);
@@ -172,8 +175,8 @@ public class MainActivity extends Activity {
                 conn = (HttpURLConnection) url.openConnection();   //Opening connection
                 conn.setRequestProperty("Cookie", "domain=192.168.20.1; SessId=" + session.getCookieSess());  //Setting Cookies
                 conn.setRequestProperty("Cookie", "domain=192.168.20.1; PageSeed=" + session.getCookiePage());  //SettingCookies
-                conn.setReadTimeout(15000 /* milliseconds */);
-                conn.setConnectTimeout(15000 /* milliseconds */);
+                conn.setReadTimeout(10000 /* milliseconds */);
+                conn.setConnectTimeout(10000 /* milliseconds */);
                 conn.setRequestMethod("POST");
                 conn.setDoInput(true);
                 conn.setDoOutput(true);
@@ -214,9 +217,18 @@ public class MainActivity extends Activity {
 
         @Override
         protected void onPostExecute(String result) {
-
+            String time=null;
             Log.d(TAG, "Remaining Time Service Execute Result: " + result);
-            String time = result.substring(114, 117);
+            try{
+                time = result.substring(114, 117);
+
+            }
+            catch (StringIndexOutOfBoundsException e)
+            {
+                Log.d(TAG, "StringIndexOutOfBoundsException occured and handled. Might also have occured due to error/exception");
+                RemainingTime=-1;
+                return;
+            }
             time = time.split(";")[0];
             RemainingTime = Integer.parseInt(time);
             progress.dismiss();
@@ -230,7 +242,6 @@ public class MainActivity extends Activity {
 
                         }
                     });
-
 
 
             AlertDialog alertDialog = alertDialogBuilder.create();

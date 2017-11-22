@@ -21,6 +21,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
+import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
@@ -46,6 +47,9 @@ public class ConnectionActivity extends Activity {
     private static final String TAG = ConnectionActivity.class.getSimpleName(); //for Logger Purposes
     ProgressDialog progress ;
     HttpURLConnection conn;
+    boolean iswalledGarden;
+    private static final String mWalledGardenUrl = "http://172.217.2.238/generate_204";
+    private static final int WALLED_GARDEN_SOCKET_TIMEOUT_MS = 10000;
 
     @Override
     public void onPause() {
@@ -71,9 +75,8 @@ public class ConnectionActivity extends Activity {
         NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
         if (activeNetwork != null) { // connected to the internet
             if (activeNetwork.getType() == ConnectivityManager.TYPE_WIFI) {
-
-                Log.d(TAG, "Checking if internet connection exists");
-
+                new LongOperation().execute();
+                    /*
                     String tag_string_req = "Ping Request";
                     StringRequest strReq = new StringRequest(Request.Method.POST, "http://swlogin.yagneshlp.com/pinp.php"
                             , new Response.Listener<String>() {
@@ -133,7 +136,7 @@ public class ConnectionActivity extends Activity {
                         1000,
                         DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
                         DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
-                    AppController.getInstance().addToRequestQueue(strReq, tag_string_req);
+                    AppController.getInstance().addToRequestQueue(strReq, tag_string_req);*/
 
 
             } else if (activeNetwork.getType() == ConnectivityManager.TYPE_MOBILE) {
@@ -151,6 +154,89 @@ public class ConnectionActivity extends Activity {
             Intent intent = new Intent(ConnectionActivity.this, ErrorActivityNowifi.class);
             startActivity(intent);
             finish();
+        }
+    }
+
+    private class LongOperation extends AsyncTask<String, Void, String> {
+        @Override
+        protected String doInBackground(String... params) {
+            HttpURLConnection urlConnection = null;
+            try {
+                URL url = new URL(mWalledGardenUrl); // "http://clients3.google.com/generate_204"
+                urlConnection = (HttpURLConnection) url.openConnection();
+                urlConnection.setInstanceFollowRedirects(false);
+                urlConnection.setConnectTimeout(WALLED_GARDEN_SOCKET_TIMEOUT_MS);
+                urlConnection.setReadTimeout(WALLED_GARDEN_SOCKET_TIMEOUT_MS);
+                urlConnection.setUseCaches(false);
+                urlConnection.getInputStream();
+                // We got a valid response, but not from the real google
+                iswalledGarden = urlConnection.getResponseCode() != 204;
+            } catch( SocketTimeoutException e){
+                //TODO timeout,proper connection not existant. show a dialog asking to wheater try again
+            }
+            catch (IOException e) {
+
+                Log.e(TAG,"Walled garden check - probably not a portal: exception "+ e);
+                iswalledGarden = false;
+            } finally {
+                if (urlConnection != null) {
+                    urlConnection.disconnect();
+                }
+            }
+
+
+           return null;
+        }
+
+        @Override
+        protected void onPostExecute(String result) {
+            if(iswalledGarden)
+            {
+                Intent intent = new Intent(ConnectionActivity.this, LoginActivity.class);
+                startActivity(intent);
+                finish();
+            }
+            else
+            {
+                resp = true;
+                session.setFirstTime(false);
+                Intent intent = new Intent(ConnectionActivity.this, MainActivity.class);
+                startActivity(intent);
+                overridePendingTransition(R.anim.fade_out,R.anim.no_change);
+                finish();
+            }
+        }
+
+        @Override
+        protected void onPreExecute() {
+            Log.d(TAG, "Checking if internet connection exists");
+        }
+
+
+    }
+
+
+
+    private boolean isWalledGardenConnection() {
+        HttpURLConnection urlConnection = null;
+        try {
+            URL url = new URL(mWalledGardenUrl); // "http://clients3.google.com/generate_204"
+            urlConnection = (HttpURLConnection) url.openConnection();
+            urlConnection.setInstanceFollowRedirects(false);
+            urlConnection.setConnectTimeout(WALLED_GARDEN_SOCKET_TIMEOUT_MS);
+            urlConnection.setReadTimeout(WALLED_GARDEN_SOCKET_TIMEOUT_MS);
+            urlConnection.setUseCaches(false);
+            urlConnection.getInputStream();
+            // We got a valid response, but not from the real google
+            return urlConnection.getResponseCode() != 204;
+        } catch (IOException e) {
+
+            Log.e(TAG,"Walled garden check - probably not a portal: exception "+ e);
+            return false;
+        } finally {
+            if (urlConnection != null) {
+                urlConnection.disconnect();
+            }
         }
     }
 

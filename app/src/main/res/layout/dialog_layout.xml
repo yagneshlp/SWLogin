@@ -38,7 +38,7 @@
         android:layout_marginTop="10dp"
         android:paddingLeft="20dp"
         android:paddingRight="20dp"
-        android:text="Many times you'd have made a small mistake. Recheck \nIf still problem persists, check if your password has to be changed at Octa"
+        android:text="Many times you'd have made a small mistake. Recheck \nIf still problem persists, check if it is time for your password to be changed at Octa"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:maxLines="10"

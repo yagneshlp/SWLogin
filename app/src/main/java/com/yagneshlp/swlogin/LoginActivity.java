@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.widget.Toast;
 import org.json.JSONObject;
@@ -32,7 +33,6 @@ import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
-
 import es.dmoral.toasty.Toasty;
 
 /**
@@ -67,7 +67,7 @@ public class LoginActivity extends Activity {
         Log.d(TAG, "New Session Initiated. Generating new cookies");
         session.setCookieSess(generateString(1));
         session.setCookePage(generateString(2));
-        Log.d(TAG, "Generated Cookies: "+"cookie1: " + session.getCookieSess() + " Cookie2: " + session.getCookiePage());
+        Log.d(TAG, "Generated Cookies: "+"Cookie1: " + session.getCookieSess() + " Cookie2: " + session.getCookiePage());
 
         wifiManager = (WifiManager) getApplicationContext().getSystemService(this.WIFI_SERVICE);
 
@@ -100,6 +100,12 @@ public class LoginActivity extends Activity {
         new SendPost1Request().execute();
         new GetClass2(this).execute();
         new SendPost2Request().execute();
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+               progress.setMessage("Its taking longer than expected...\nHold on!");
+            }
+        }, 6000);
     }
 
 
@@ -142,10 +148,18 @@ public class LoginActivity extends Activity {
 
 
             } catch (MalformedURLException e) {
-                // TODO Auto-generated catch block
+                Toasty.error(getApplicationContext(), "Login Failed.\nTry Again Later",Toast.LENGTH_LONG).show();
+                Intent intent = new Intent(LoginActivity.this, CredActivity.class);
+                startActivity(intent);
+                overridePendingTransition(R.anim.fade_out,R.anim.no_change);
+                finish();
                 e.printStackTrace();
             } catch (IOException e) {
-                // TODO Auto-generated catch block
+                Toasty.error(getApplicationContext(), "Login Failed.\nTry Again Later",Toast.LENGTH_LONG).show();
+                Intent intent = new Intent(LoginActivity.this, CredActivity.class);
+                startActivity(intent);
+                overridePendingTransition(R.anim.fade_out,R.anim.no_change);
+                finish();
                 e.printStackTrace();
             }
             return null;
@@ -202,10 +216,21 @@ public class LoginActivity extends Activity {
 
                 }
                 else {
+
+                    Toasty.error(getApplicationContext(), "Login Failed.\nTry Again Later",Toast.LENGTH_LONG).show();
+                    Intent intent = new Intent(LoginActivity.this, CredActivity.class);
+                    startActivity(intent);
+                    overridePendingTransition(R.anim.fade_out,R.anim.no_change);
+                    finish();
                     return new String("Error : "+responseCode);
                 }
             }
             catch(Exception e){
+                Toasty.error(getApplicationContext(), "Login Failed.\nTry Again Later",Toast.LENGTH_LONG).show();
+                Intent intent = new Intent(LoginActivity.this, CredActivity.class);
+                startActivity(intent);
+                overridePendingTransition(R.anim.fade_out,R.anim.no_change);
+                finish();
                 return new String("Exception: " + e.getMessage());
             }
 
@@ -217,7 +242,7 @@ public class LoginActivity extends Activity {
             boolean found = result.contains("refresh=true");
             if(found)
             {
-                Toasty.error(getApplicationContext(), "Please Check your Credentials and try again !",Toast.LENGTH_LONG).show();
+                Toasty.error(getApplicationContext(), "Login Failed :(\nPlease Check your Credentials and try again",Toast.LENGTH_LONG).show();
                 Intent intent = new Intent(LoginActivity.this, CredActivity.class);
                 startActivity(intent);
                 overridePendingTransition(R.anim.fade_out,R.anim.no_change);
@@ -269,10 +294,18 @@ public class LoginActivity extends Activity {
 
 
             } catch (MalformedURLException e) {
-                // TODO Auto-generated catch block
+                Toasty.error(getApplicationContext(), "Login Failed.\nTry Again Later",Toast.LENGTH_LONG).show();
+                Intent intent = new Intent(LoginActivity.this, CredActivity.class);
+                startActivity(intent);
+                overridePendingTransition(R.anim.fade_out,R.anim.no_change);
+                finish();
                 e.printStackTrace();
             } catch (IOException e) {
-                // TODO Auto-generated catch block
+                Toasty.error(getApplicationContext(), "Login Failed.\nTry Again Later",Toast.LENGTH_LONG).show();
+                Intent intent = new Intent(LoginActivity.this, CredActivity.class);
+                startActivity(intent);
+                overridePendingTransition(R.anim.fade_out,R.anim.no_change);
+                finish();
                 e.printStackTrace();
             }
             return null;
@@ -325,10 +358,20 @@ public class LoginActivity extends Activity {
 
                 }
                 else {
+                    Toasty.error(getApplicationContext(), "Login Failed.\nTry Again Later",Toast.LENGTH_LONG).show();
+                    Intent intent = new Intent(LoginActivity.this, CredActivity.class);
+                    startActivity(intent);
+                    overridePendingTransition(R.anim.fade_out,R.anim.no_change);
+                    finish();
                     return new String("false : "+responseCode);
                 }
             }
             catch(Exception e){
+                Toasty.error(getApplicationContext(), "Login Failed.\nTry Again Later",Toast.LENGTH_LONG).show();
+                Intent intent = new Intent(LoginActivity.this, CredActivity.class);
+                startActivity(intent);
+                overridePendingTransition(R.anim.fade_out,R.anim.no_change);
+                finish();
                 return new String("Exception: " + e.getMessage());
             }
 
@@ -344,7 +387,7 @@ public class LoginActivity extends Activity {
                 int RemainingTime = Integer.parseInt(time);
                 if(RemainingTime != 180 )
                 {
-                    Toasty.error(getApplicationContext(), "Login Not Successful \nCheck your Credentials", Toast.LENGTH_SHORT, true).show();
+                    Toasty.error(getApplicationContext(), "Login Not Successful \nTry again, if problem persists try the troubleshooting guide", Toast.LENGTH_SHORT, true).show();
                     Intent intent = new Intent(LoginActivity.this, CredActivity.class);
                     startActivity(intent);
                     overridePendingTransition(R.anim.fade_out,R.anim.no_change);
